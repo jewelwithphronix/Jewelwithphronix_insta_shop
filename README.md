@@ -27,5 +27,26 @@ Routing is handled by `react-router-dom` (`BrowserRouter` in `main.jsx`), so
 "opening a page" is a real route change, not a modal — you get a shareable
 URL per product (`/product/p1`, `/product/p2`, ...).
 
+## Continue with Google (Supabase Auth)
+
+1. **Env keys** — copy `.env.example` to `.env` and fill in the Project URL and
+   `anon` key from Supabase → Project Settings → API. Restart `npm run dev`.
+2. **Google Cloud** — console.cloud.google.com → APIs & Services:
+   - OAuth consent screen: External, app name, support email, then **Publish app**
+     (in "Testing" mode only listed test users can sign in).
+   - Credentials → Create credentials → OAuth client ID → **Web application**.
+   - Authorized JavaScript origins: `http://localhost:5173` and your live domain.
+   - Authorized redirect URIs: `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback`
+   - Copy the Client ID and Client secret.
+3. **Supabase** → Authentication → Sign In / Providers → **Google**: enable it,
+   paste Client ID + secret, save.
+4. **Supabase** → Authentication → URL Configuration:
+   - Site URL: your live domain (e.g. `https://jewelwithphronix.com`)
+   - Redirect URLs: add `http://localhost:5173/login` and `https://YOUR-DOMAIN/login`
+5. **Hosting** — the deploy must serve `index.html` for every path so `/login`
+   works when Google sends the customer back. `vercel.json` (Vercel) and
+   `public/_redirects` (Netlify) already do this; add the same env vars in the
+   host's dashboard.
+
 Replace the flat color swatches in `products.js` with real image or video
 URLs (e.g. an `<img>`/`<video>` in `ReelCard`) once you have media assets.

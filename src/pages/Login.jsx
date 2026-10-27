@@ -33,6 +33,20 @@ export default function Login() {
     }
   }, [user, navigate]);
 
+  // Google/Supabase ne error sobat parat pathavla tar (?error=... kinva #error=...) te dakhva
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search + "&" + window.location.hash.slice(1));
+    const msg = params.get("error_description") || params.get("error");
+    if (!msg) return;
+    sessionStorage.removeItem("afterLogin");
+    setError(
+      /provider is not enabled|Unsupported provider/i.test(msg)
+        ? "Google login ajun Supabase madhe chalu kela nahi."
+        : "Google sign-in failed: " + msg.replace(/\+/g, " ")
+    );
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
+
   async function handleGoogle() {
     setError("");
     setBusy(true);

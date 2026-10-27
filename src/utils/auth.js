@@ -51,7 +51,10 @@ export async function signInWithGoogle() {
   if (!supabase) throw new Error("Supabase connect nahi. .env file tapasa.");
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: window.location.origin + "/login" },
+    options: {
+      redirectTo: window.location.origin + "/login",
+      queryParams: { prompt: "select_account" }, // customer la Google account nivadu dya
+    },
   });
   if (error) throw new Error(error.message);
 }
