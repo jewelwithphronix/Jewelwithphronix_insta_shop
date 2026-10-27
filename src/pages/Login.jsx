@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { BRAND } from "../config/brand.js";
-import { useAuth, signIn, signOut, signInWithGoogle } from "../utils/auth.js";
 import { LogoMark, ArrowRight } from "../components/Icons.jsx";
 
 const GoogleG = () => (
@@ -14,65 +13,27 @@ const GoogleG = () => (
 );
 
 export default function Login() {
-  const user = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from || "/";
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [news, setNews] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
-
-  // Google varun parat aalyavar, customer jithe hota tithe pathva
-  useEffect(() => {
-    const dest = sessionStorage.getItem("afterLogin");
-    if (user && dest) {
-      sessionStorage.removeItem("afterLogin");
-      navigate(dest, { replace: true });
-    }
-  }, [user, navigate]);
-
-  async function handleGoogle() {
-    setError("");
-    setBusy(true);
-    try {
-      sessionStorage.setItem("afterLogin", from);
-      await signInWithGoogle(); // Google chya page var jato
-    } catch (e) {
-      sessionStorage.removeItem("afterLogin");
-      setError(
-        /provider is not enabled|Unsupported provider/i.test(e.message)
-          ? "Google login ajun Supabase madhe chalu kela nahi."
-          : e.message
-      );
-      setBusy(false);
-    }
-  }
 
   function handleEmail(e) {
     e.preventDefault();
-    if (!name.trim()) return setError("Please enter your name.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError("Please enter a valid email address.");
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!ok) {
+      setMsg("");
+      setError("Please enter a valid email address.");
+      return;
+    }
     setError("");
-    signIn({ name: name.trim(), email: email.trim(), news });
-    navigate(from, { replace: true });
+    // TODO: connect your real sign-in / OTP API here
+    setMsg(`We'll send a sign-in code to ${email.trim()} once login is connected.`);
   }
 
-  if (user) {
-    return (
-      <main className="login">
-        <Link to="/" className="login__logo" aria-label={`${BRAND.name} home`}>
-          <LogoMark size={64} letter={BRAND.initial} />
-        </Link>
-        <section className="login__box">
-          <h1 className="login__title">Hi, {user.name || "there"}!</h1>
-          <p className="login__sub">You are signed in as {user.email}</p>
-          <Link to="/" className="login__btn login__btn--shop" style={{ textDecoration: "none" }}>Continue shopping</Link>
-          <button type="button" className="login__btn login__btn--google" onClick={signOut}>Sign out</button>
-        </section>
-      </main>
-    );
+  function comingSoon(name) {
+    setError("");
+    setMsg(`${name} sign-in will be available soon.`);
   }
 
   return (
@@ -85,24 +46,17 @@ export default function Login() {
         <h1 className="login__title">Sign in</h1>
         <p className="login__sub">Sign in or create an account</p>
 
-        <button type="button" className="login__btn login__btn--google" onClick={handleGoogle} disabled={busy}>
+        <button type="button" className="login__btn login__btn--shop" onClick={() => comingSoon("Shop")}>
+          Continue with shop
+        </button>
+        <button type="button" className="login__btn login__btn--google" onClick={() => comingSoon("Google")}>
           <GoogleG />
-          {busy ? "Opening Google…" : "Continue with Google"}
+          Continue with Google
         </button>
 
         <div className="login__or"><span>or</span></div>
 
         <form onSubmit={handleEmail} noValidate>
-          <div className="login__field" style={{ marginBottom: 10 }}>
-            <input
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              aria-label="Name"
-            />
-          </div>
           <div className={"login__field" + (error ? " login__field--error" : "")}>
             <input
               type="email"
@@ -111,6 +65,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               aria-label="Email"
+              autoFocus
             />
             <button type="submit" aria-label="Continue">
               <ArrowRight size={22} />
@@ -118,6 +73,7 @@ export default function Login() {
           </div>
 
           {error && <p className="login__error" role="alert">{error}</p>}
+          {msg && <p className="login__msg" role="status">{msg}</p>}
 
           <label className="login__check">
             <input type="checkbox" checked={news} onChange={(e) => setNews(e.target.checked)} />

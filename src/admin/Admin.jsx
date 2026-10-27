@@ -8,7 +8,6 @@ import {
 } from "../utils/productStore.js";
 import "./admin.css";
 import { BRAND } from "../config/brand.js";
-
 const BUCKET = "product-images";
 const BLANK = { name: "", productCode: "", category: "Bracelets", mrp: "", price: "", discount: "", caption: "", clearance: false, inStock: true, images: [] };
 
@@ -212,20 +211,6 @@ export default function Admin() {
     );
   }
   if (session === undefined) return <main className="adm adm--login"><p>Loading…</p></main>;
-
-  // Google ne login kelelya customer la admin panel dakhvu naka
-  if (session && session.user.email?.toLowerCase() !== BRAND.adminEmail.toLowerCase()) {
-    return (
-      <main className="adm adm--login">
-        <div className="adm__form">
-          <h1>Admin only</h1>
-          <p className="adm__note">Ha page fakt admin sathi aahe. Tumhi {session.user.email} ne login aahat.</p>
-          <button type="button" className="btn btn--solid" onClick={() => supabase.auth.signOut()}>Log out</button>
-          <Link to="/" className="adm__link" style={{ textAlign: "center" }}>Back to shop</Link>
-        </div>
-      </main>
-    );
-  }
   if (session) return <Panel email={session.user.email} />;
 
   async function login(e) {
@@ -233,7 +218,7 @@ export default function Admin() {
     setBusy(true);
     setErr("");
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
-    if (error) setErr(error.message);
+       if (error) setErr(error.message);
     setBusy(false);
   }
 
