@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Price from "./Price.jsx";
+import { imgProps } from "../utils/img.js";
 import { HeartIcon } from "./Icons.jsx";
 import { useLikes, toggleLike, likeProduct } from "../utils/likes.js";
 import { discountPercent } from "../utils/productStore.js";
@@ -11,6 +12,8 @@ export default function ProductCard({ product, variant = "default" }) {
   const liked = isLiked(product.id);
   const [bigHeart, setBigHeart] = useState(0); // double-click heart (counter restarts the animation)
   const [hearts, setHearts] = useState([]); // floating hearts
+  const timers = useRef(new Set());
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []); // clear on unmount
   const cover = product.images?.[0];
   const off = discountPercent(product);
 
@@ -27,7 +30,11 @@ export default function ProductCard({ product, variant = "default" }) {
       right: 10 + Math.round(Math.random() * 24),
     }));
     setHearts((h) => [...h, ...batch]);
-    window.setTimeout(() => setHearts((h) => h.filter((x) => !batch.includes(x))), 2800);
+    const t = window.setTimeout(() => {
+      timers.current.delete(t);
+      setHearts((h) => h.filter((x) => !batch.includes(x)));
+    }, 2800);
+    timers.current.add(t);
   }
 
   function handleLike(e) {
@@ -52,7 +59,7 @@ export default function ProductCard({ product, variant = "default" }) {
       <div className="card__image" onDoubleClick={handleDoubleClick}>
         <Link to={to} className="card__media" tabIndex={-1} aria-hidden="true">
           {cover ? (
-            <img src={cover} alt="" decoding="async" />
+            <img {...imgProps(cover)} alt="" decoding="async" />
           ) : (
             <span className="card__swatch" style={{ background: product.color }} />
           )}

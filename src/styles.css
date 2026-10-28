@@ -1505,3 +1505,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
   .cart__line-total { grid-column: auto; font-size: 16px; }
   .cart__line-total::before { content: none; }
 }
+
+/* loading placeholders */
+.card--skeleton .card__image { background: #f1ebe8; border-color: transparent; }
+.skel { height: 12px; border-radius: 6px; background: #f1ebe8; margin-top: 10px; }
+.skel--line { width: 85%; }
+.skel--short { width: 45%; }
+@media (prefers-reduced-motion: no-preference) {
+  .card--skeleton .card__image, .skel { animation: skel-pulse 1.4s ease-in-out infinite; }
+}
+@keyframes skel-pulse { 50% { opacity: 0.55; } }
+.page-loading { min-height: 70vh; }

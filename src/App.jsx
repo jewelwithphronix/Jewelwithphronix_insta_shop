@@ -1,19 +1,24 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { BRAND } from "./config/brand.js";
 import { useAuth } from "./utils/auth.js";
 import { supabase } from "./lib/supabase.js";
 import Home from "./pages/Home.jsx";
 import ProductListing from "./pages/ProductListing.jsx";
-import SearchResults from "./pages/SearchResults.jsx";
-import Login from "./pages/Login.jsx";
-import Wishlist from "./pages/Wishlist.jsx";
-import Cart from "./pages/Cart.jsx";
-import Shop from "./pages/Shop.jsx";
-import Catalog from "./pages/Catalog.jsx";
-import Returns from "./pages/Returns.jsx";
-import Contact from "./pages/Contact.jsx";
-import Faq from "./pages/Faq.jsx";
-import Admin from "./admin/Admin.jsx";
+
+// Home + product page load straight away; every other page downloads only when opened
+// (shoppers no longer download the admin panel).
+const SearchResults = lazy(() => import("./pages/SearchResults.jsx"));
+const Login = lazy(() => import("./pages/Login.jsx"));
+const Wishlist = lazy(() => import("./pages/Wishlist.jsx"));
+const Cart = lazy(() => import("./pages/Cart.jsx"));
+const Shop = lazy(() => import("./pages/Shop.jsx"));
+const Catalog = lazy(() => import("./pages/Catalog.jsx"));
+const Returns = lazy(() => import("./pages/Returns.jsx"));
+const Contact = lazy(() => import("./pages/Contact.jsx"));
+const Faq = lazy(() => import("./pages/Faq.jsx"));
+const Admin = lazy(() => import("./admin/Admin.jsx"));
+const NotFound = lazy(() => import("./pages/NotFound.jsx"));
 
 // Browsing is open to everyone. Only checkout (/cart) needs sign in.
 // Not signed in -> /login, then back here after signing in (set requireLogin: false in brand.js to turn off).
@@ -34,6 +39,7 @@ export default function App() {
     <>
     {/* first thing keyboard users reach on every page */}
     <a href="#main" className="skip-link">Skip to content</a>
+    <Suspense fallback={<div className="page-loading" role="status" aria-label="Loading" />}>
     <Routes>
       <Route path="/" element={Open(<Home />)} />
       <Route path="/product/:id" element={Open(<ProductListing />)} />
@@ -47,7 +53,9 @@ export default function App() {
       <Route path="/cart" element={P(<Cart />)} />
       <Route path="/login" element={<Login />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
     </>
   );
 }

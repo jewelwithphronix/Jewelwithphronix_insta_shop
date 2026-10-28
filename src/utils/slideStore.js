@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabase.js";
+import { onReturn } from "./onReturn.js";
 
 // Home page slider. Admin panel madhun add / edit / delete / reorder kele ki customers la lagech disate.
 // Supabase madhe ek pan slide nasel tar khalche default slides dakhavto.
@@ -48,10 +49,7 @@ export async function refreshSlides() {
 
 if (supabase && typeof window !== "undefined") {
   refreshSlides();
-  supabase
-    .channel("slides-live")
-    .on("postgres_changes", { event: "*", schema: "public", table: "slides" }, () => refreshSlides())
-    .subscribe();
+  onReturn(refreshSlides);
 }
 
 export const useSlides = () => useSyncExternalStore(subscribe, () => list);

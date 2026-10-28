@@ -1,5 +1,6 @@
 // import products from "../data/products.js";
-import { useProducts } from "../utils/productStore.js";
+import { useProducts, useProductsReady } from "../utils/productStore.js";
+import SkeletonCards from "../components/SkeletonCards.jsx";
 import { useLikes } from "../utils/likes.js";
 import ProductCard from "../components/ProductCard.jsx";
 import AnnouncementBar from "../components/AnnouncementBar.jsx";
@@ -11,7 +12,8 @@ import Footer from "../components/Footer.jsx";
 import FloatingWidgets from "../components/FloatingWidgets.jsx";
 
 export default function Home() {
-  const products = useProducts();   // ← hi navin line
+  const products = useProducts();
+  const ready = useProductsReady();
   const { isLiked, total } = useLikes();
   const likedProducts = products.filter((p) => isLiked(p.id));
 
@@ -41,6 +43,7 @@ export default function Home() {
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
+          {!ready && products.length === 0 && <SkeletonCards />}
         </div>
       </main>
       <Footer />

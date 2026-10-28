@@ -53,17 +53,16 @@ async function fetchReviews(productId) {
   commit({ ...state, [productId]: data.map(fromRow) });
 }
 
-if (supabase && typeof window !== "undefined") {
-  // navin review / delete jhala ki ughadlelya product page var lagech update
-  supabase
-    .channel("reviews-live")
-    .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, (p) => {
-      const pid = p.new?.product_id || p.old?.product_id;
-      if (pid && fetched.has(pid)) fetchReviews(pid);
-      else if (p.eventType === "DELETE") fetched.forEach(fetchReviews);
-    })
+// live updates fakt product page ughadla asel tevha (ek connection, page sodla ki band)
+function watchReviews(productId) {
+  const ch = supabase
+    .channel("reviews-" + productId)
+    .on("postgres_changes", { event: "*", schema: "public", table: "reviews", filter: `product_id=eq.${productId}` }, () => fetchReviews(productId))
     .subscribe();
-} else if (typeof window !== "undefined") {
+  return () => supabase.removeChannel(ch);
+}
+
+if (!supabase && typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
     if (e.key === KEY) commit(loadLocal());
   });
@@ -98,9 +97,12 @@ export async function deleteReview(productId, reviewId) {
 export function useReviews(productId) {
   const s = useSyncExternalStore(subscribe, () => state);
   useEffect(() => {
-    if (!supabase || fetched.has(productId)) return;
-    fetched.add(productId);
-    fetchReviews(productId);
+    if (!supabase) return;
+    if (!fetched.has(productId)) {
+      fetched.add(productId);
+      fetchReviews(productId);
+    }
+    return watchReviews(productId);
   }, [productId]);
   const list = s[productId] || [];
   const avg = list.length ? list.reduce((n, r) => n + r.rating, 0) / list.length : 0;

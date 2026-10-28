@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 // import products from "../data/products.js";
-import { useProducts } from "../utils/productStore.js";
+import { useProducts, useProductsReady } from "../utils/productStore.js";
+import PageShell from "../components/PageShell.jsx";
+import NotFound from "./NotFound.jsx";
 import AccordionRow from "../components/AccordionRow.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import Reviews from "../components/Reviews.jsx";
@@ -15,12 +17,23 @@ import { rs } from "../utils/format.js";
 import { HeartIcon } from "../components/Icons.jsx";
 import { useLikes, toggleLike, likeProduct } from "../utils/likes.js";
 import { addToCart } from "../utils/cart.js";
+import { imgProps } from "../utils/img.js";
 
 export default function ProductListing() {
-  const products = useProducts(); 
+  const products = useProducts();
+  const ready = useProductsReady();
   const { id } = useParams();
+  const selected = products.find((p) => p.id === id);
+
+  if (!selected) {
+    if (!ready) return <PageShell><main className="cart-empty" aria-busy="true"><p>Loading…</p></main></PageShell>;
+    return <NotFound title="Product not found" text="This piece may have sold out or been removed." />;
+  }
+  return <ProductPage key={selected.id} selected={selected} products={products} />;
+}
+
+function ProductPage({ selected, products }) {
   const navigate = useNavigate();
-  const selected = products.find((p) => p.id === id) ?? products[0];
 
   const { isLiked } = useLikes();
   const wished = isLiked(selected.id);
@@ -31,12 +44,15 @@ export default function ProductListing() {
   const [hearts, setHearts] = useState([]);   // floating hearts
   const [bigHeart, setBigHeart] = useState(0); // double-tap heart (counter restarts animation)
 
-  useEffect(() => {
-    setActiveImage(selected.images?.[0]);
-    setQuantity(1);
-    setConfirmation("");
-    setHearts([]);
-  }, [selected.id]);
+  // timers cleared when leaving the page (no setState after unmount)
+  const timers = useRef(new Set());
+  const later = (fn, ms) => {
+    const t = window.setTimeout(() => { timers.current.delete(t); fn(); }, ms);
+    timers.current.add(t);
+    return t;
+  };
+  const confirmTimer = useRef(0);
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
   const imgCount = selected.images?.length || 0;
   const imgIndex = Math.max(0, selected.images?.indexOf(activeImage) ?? 0);
@@ -81,7 +97,7 @@ export default function ProductListing() {
       right: 14 + Math.round(Math.random() * 30),
     }));
     setHearts((h) => [...h, ...batch]);
-    window.setTimeout(() => setHearts((h) => h.filter((x) => !batch.includes(x))), 3200);
+    later(() => setHearts((h) => h.filter((x) => !batch.includes(x))), 3200);
   }
 
   function handleWishClick(e) {
@@ -99,8 +115,8 @@ export default function ProductListing() {
 
   function showConfirmation(message) {
     setConfirmation(message);
-    window.clearTimeout(showConfirmation._t);
-    showConfirmation._t = window.setTimeout(() => setConfirmation(""), 2200);
+    window.clearTimeout(confirmTimer.current);
+    confirmTimer.current = later(() => setConfirmation(""), 2200);
   }
 
   return (
@@ -117,7 +133,7 @@ export default function ProductListing() {
         >
           {activeImage && (
             <img
-              src={activeImage}
+              {...imgProps(activeImage, "(min-width: 1024px) 600px, 100vw")}
               alt={`${selected.name}${imgCount > 1 ? `, photo ${imgIndex + 1} of ${imgCount}` : ""}`}
             />
           )}
@@ -171,7 +187,7 @@ export default function ProductListing() {
                 aria-label={`Show photo ${i + 1} of ${imgCount}`}
                 aria-current={src === activeImage}
               >
-                <img src={src} alt="" loading="lazy" className="pdp__thumb" />
+                <img {...imgProps(src, "80px")} alt="" loading="lazy" className="pdp__thumb" />
               </button>
             ))}
           </div>

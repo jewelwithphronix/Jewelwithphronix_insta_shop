@@ -4,6 +4,8 @@ import { BRAND } from "../config/brand.js";
 import { rs } from "../utils/format.js";
 import { useCart, setQty, removeFromCart, clearCart } from "../utils/cart.js";
 import { priceCart, recordOrder, retryPendingOrders } from "../utils/orders.js";
+import { useProductsReady } from "../utils/productStore.js";
+import { imgProps } from "../utils/img.js";
 import { useAddress, saveAddress, addressComplete, detectLocation } from "../utils/address.js";
 import { useAuth } from "../utils/auth.js";
 import AnnouncementBar from "../components/AnnouncementBar.jsx";
@@ -16,6 +18,7 @@ const FREE_SHIPPING_ABOVE = BRAND.freeShippingAbove;
 
 export default function Cart() {
   const { lines, count, subtotal } = useCart();
+  const ready = useProductsReady(); // until products load, cart lines can't be matched yet
 
   const addr = useAddress();
   const user = useAuth();
@@ -122,6 +125,8 @@ export default function Cart() {
           </a>
           <Link to="/" className="cart-btn" onClick={() => setPlaced(null)}>Continue shopping</Link>
         </section>
+      ) : !ready ? (
+        <section className="cart-empty" aria-busy="true"><p>Loading your cart…</p></section>
       ) : lines.length === 0 ? (
         <section className="cart-empty">
           <h1>Your cart is empty</h1>
@@ -143,7 +148,7 @@ export default function Cart() {
               <li key={product.id} className="cart__item">
                 <Link to={`/product/${product.id}`} className="cart__img">
                   {product.images?.[0] ? (
-                    <img src={product.images[0]} alt={product.name} />
+                    <img {...imgProps(product.images[0], "96px")} alt="" />
                   ) : (
                     <span style={{ background: product.color }} />
                   )}

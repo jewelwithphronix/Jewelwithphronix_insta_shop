@@ -1,7 +1,8 @@
 import { useState } from "react";
 import PageShell from "./PageShell.jsx";
 import ProductCard from "./ProductCard.jsx";
-import { useProducts } from "../utils/productStore.js";
+import { useProducts, useProductsReady } from "../utils/productStore.js";
+import SkeletonCards from "./SkeletonCards.jsx";
 
 const SORTS = {
   newest: { label: "Newest first" },
@@ -14,6 +15,7 @@ const SORTS = {
 // `filter` thrvto kon-te products dakhvaychet.
 export default function ProductsPage({ title, subtitle, filter = () => true, emptyText, categories = false }) {
   const all = useProducts();
+  const ready = useProductsReady();
   const [sort, setSort] = useState("newest");
   const [cat, setCat] = useState("All");
 
@@ -46,7 +48,9 @@ export default function ProductsPage({ title, subtitle, filter = () => true, emp
           </label>
         </div>
 
-        {shown.length ? (
+        {!ready && !all.length ? (
+          <div className="grid"><SkeletonCards /></div>
+        ) : shown.length ? (
           <div className="grid">
             {shown.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useProducts } from "../utils/productStore.js";
 import { SearchIcon } from "./Icons.jsx";
 import { rs } from "../utils/format.js";
+import { imgProps } from "../utils/img.js";
 
 export default function SearchBar({ className = "mx-7 mb-5 max-w-3xl md:mx-auto" }) {
   const [query, setQuery] = useState("");
@@ -117,7 +118,7 @@ export default function SearchBar({ className = "mx-7 mb-5 max-w-3xl md:mx-auto"
                   onClick={() => handleResultClick(product.id)}
                 >
                   {cover ? (
-                    <img src={cover} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg border border-gray-200 object-cover" />
+                    <img {...imgProps(cover, "48px")} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg border border-gray-200 object-cover" />
                   ) : (
                     <span className="h-12 w-12 flex-shrink-0 rounded-lg" style={{ background: product.color }} aria-hidden="true" />
                   )}

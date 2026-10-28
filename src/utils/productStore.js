@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabase.js";
 import baseProducts from "../data/products.js";
+import { onReturn } from "./onReturn.js";
 
 // Products aata Supabase database madhun yetat. Admin ne badalle ki sarva customers la disate.
 // Supabase connect nasel tar data/products.js vaparto (junya sarkhe).
@@ -36,20 +37,24 @@ function toRow(fields) {
   return row;
 }
 
+// Supabase asel tar demo products (data/products.js) kadhich dakhvu naka:
+// aadhi save kelela cache, nahitar rikami list jopryant khara data yet nahi.
 function initial() {
   if (!supabase) return baseProducts.map(normalize);
   try {
     const c = JSON.parse(localStorage.getItem(CACHE) || "null");
     if (Array.isArray(c)) return c;
   } catch { /* ignore */ }
-  return baseProducts.map(normalize);
+  return [];
 }
 
 let list = initial();
+let ready = !supabase; // true once the first real load finished (or failed)
 const listeners = new Set();
 const subscribe = (l) => (listeners.add(l), () => listeners.delete(l));
 function setList(next) {
   list = next;
+  ready = true;
   try { localStorage.setItem(CACHE, JSON.stringify(next)); } catch { /* ignore */ }
   listeners.forEach((l) => l());
 }
@@ -58,21 +63,23 @@ export async function refreshProducts() {
   if (!supabase) return;
   const { data, error } = await supabase
     .from("products").select("*").order("created_at", { ascending: true }).order("id", { ascending: true });
-  if (error) return console.error("Products load error:", error.message);
+  if (error) {
+    console.error("Products load error:", error.message);
+    ready = true;
+    return listeners.forEach((l) => l());
+  }
   setList(data.map(fromRow));
 }
 
 if (supabase && typeof window !== "undefined") {
   refreshProducts();
-  // admin ne kahi badalle ki customer chya screen var lagech update
-  supabase
-    .channel("products-live")
-    .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => refreshProducts())
-    .subscribe();
+  // live connection navhe: customer parat tab var aala ki taaze products ghya
+  onReturn(refreshProducts);
 }
 
 export const getProducts = () => list;
 export const useProducts = () => useSyncExternalStore(subscribe, () => list);
+export const useProductsReady = () => useSyncExternalStore(subscribe, () => ready);
 export const backendConnected = !!supabase;
 
 function need() {
