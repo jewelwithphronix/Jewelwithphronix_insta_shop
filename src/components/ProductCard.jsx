@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { rs } from "../utils/format.js";
+import Price from "./Price.jsx";
 import { HeartIcon } from "./Icons.jsx";
 import { useLikes, toggleLike, likeProduct } from "../utils/likes.js";
 import { discountPercent } from "../utils/productStore.js";
@@ -45,29 +45,31 @@ export default function ProductCard({ product, variant = "default" }) {
     burstHearts(8);
   }
 
+  const to = `/product/${product.id}`;
   return (
-    <Link to={`/product/${product.id}`} className={"card" + (boxed ? " card--boxed" : "")}>
-      <div
-        className="card__image"
-        style={
-          cover
-            ? { backgroundImage: `url(${cover})`, backgroundSize: "cover", backgroundPosition: "center" }
-            : { background: product.color }
-        }
-        onDoubleClick={handleDoubleClick}
-      >
+    // article + separate link/button: a button inside a link confuses keyboards and screen readers
+    <article className={"card" + (boxed ? " card--boxed" : "")}>
+      <div className="card__image" onDoubleClick={handleDoubleClick}>
+        <Link to={to} className="card__media" tabIndex={-1} aria-hidden="true">
+          {cover ? (
+            <img src={cover} alt="" decoding="async" />
+          ) : (
+            <span className="card__swatch" style={{ background: product.color }} />
+          )}
+        </Link>
         {product.inStock === false ? (
           <span className="discount-badge discount-badge--soldout">Sold out</span>
-        ) : off > 0 && <span className="discount-badge">{off}% OFF</span>}
+        ) : off > 0 && <span className="discount-badge">{off}% off</span>}
         <button
           type="button"
-          className={`card__wish ${liked ? 'card__wish--liked' : ''}`}
-          aria-label={liked ? "Unlike" : "Like"}
+          className={`card__wish ${liked ? "card__wish--liked" : ""}`}
+          aria-label={`Save ${product.name} to wishlist`}
+          aria-pressed={liked}
           onClick={handleLike}
         >
-          <HeartIcon size={boxed ? 26 : 17} filled={liked} />
+          <HeartIcon size={boxed ? 26 : 18} filled={liked} />
         </button>
-        
+
         {/* big heart on double-click */}
         {bigHeart > 0 && (
           <span key={bigHeart} className="big-heart" aria-hidden="true">
@@ -95,12 +97,11 @@ export default function ProductCard({ product, variant = "default" }) {
         ))}
       </div>
       <div className="card__body">
-        <p className="card__name">{product.name}</p>
-        <p className="card__price">
-          <span className="card__mrp">{rs(product.mrp)}</span>
-          <span className="card__sale">{rs(product.price)}</span>
-        </p>
+        <h3 className="card__name">
+          <Link to={to} className="card__link">{product.name}</Link>
+        </h3>
+        <Price product={product} className="card__price" />
       </div>
-    </Link>
+    </article>
   );
 }

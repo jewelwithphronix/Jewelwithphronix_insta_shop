@@ -8,7 +8,7 @@ import Reviews from "../components/Reviews.jsx";
 import BottomNav from "../components/BottomNav.jsx";
 // import AnnouncementBar from "../components/AnnouncementBar.jsx";
 // import Header from "../components/Header.jsx";
-import Footer, { Newsletter } from "../components/Footer.jsx";
+import Footer from "../components/Footer.jsx";
 import FloatingWidgets from "../components/FloatingWidgets.jsx";
 import { rs } from "../utils/format.js";
 import { HeartIcon } from "../components/Icons.jsx";
@@ -295,7 +295,6 @@ export default function ProductListing() {
           </div>
         </section>
       </main>
-      <Newsletter />
       <Footer />
       <FloatingWidgets />
       <BottomNav />

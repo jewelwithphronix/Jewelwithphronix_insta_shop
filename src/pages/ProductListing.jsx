@@ -6,10 +6,11 @@ import AccordionRow from "../components/AccordionRow.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import Reviews from "../components/Reviews.jsx";
 import BottomNav from "../components/BottomNav.jsx";
-// import AnnouncementBar from "../components/AnnouncementBar.jsx";
-// import Header from "../components/Header.jsx";
-import Footer, { Newsletter } from "../components/Footer.jsx";
+import Header from "../components/Header.jsx";
+import Price from "../components/Price.jsx";
+import Footer from "../components/Footer.jsx";
 import FloatingWidgets from "../components/FloatingWidgets.jsx";
+import { BRAND } from "../config/brand.js";
 import { rs } from "../utils/format.js";
 import { HeartIcon } from "../components/Icons.jsx";
 import { useLikes, toggleLike, likeProduct } from "../utils/likes.js";
@@ -37,6 +38,8 @@ export default function ProductListing() {
     setHearts([]);
   }, [selected.id]);
 
+  const imgCount = selected.images?.length || 0;
+  const imgIndex = Math.max(0, selected.images?.indexOf(activeImage) ?? 0);
   const related = products.filter((p) => p.id !== selected.id).slice(0, 4);
 
   const touchStartX = useRef(null);
@@ -102,25 +105,27 @@ export default function ProductListing() {
 
   return (
     <>
-      {/* <AnnouncementBar />
-      <Header showSearch /> */}
+      <Header />
 
       <main className="pdp">
         <div
           className="pdp__hero"
-          style={
-            activeImage
-              ? { backgroundImage: `url(${activeImage})`, backgroundSize: "cover", backgroundPosition: "center" }
-              : { background: selected.color }
-          }
+          style={activeImage ? undefined : { background: selected.color }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onDoubleClick={handleDoubleLike}
         >
+          {activeImage && (
+            <img
+              src={activeImage}
+              alt={`${selected.name}${imgCount > 1 ? `, photo ${imgIndex + 1} of ${imgCount}` : ""}`}
+            />
+          )}
           <button
             type="button"
             className={"pdp__hero-wish" + (wished ? " pdp__hero-wish--active" : "")}
-            aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={`Save ${selected.name} to wishlist`}
+            aria-pressed={wished}
             onClick={handleWishClick}
             onDoubleClick={(e) => e.stopPropagation()}
           >
@@ -153,9 +158,9 @@ export default function ProductListing() {
           ))}
         </div>
 
-        {selected.images && selected.images.length > 1 && (
-          <div className="pdp__gallery">
-            {selected.images.map((src) => (
+        {imgCount > 1 && (
+          <div className="pdp__gallery" role="group" aria-label="Product photos">
+            {selected.images.map((src, i) => (
               <button
                 key={src}
                 type="button"
@@ -163,24 +168,21 @@ export default function ProductListing() {
                   "pdp__thumb-btn" + (src === activeImage ? " pdp__thumb-btn--active" : "")
                 }
                 onClick={() => setActiveImage(src)}
-                aria-label={`Show ${selected.name} photo`}
+                aria-label={`Show photo ${i + 1} of ${imgCount}`}
+                aria-current={src === activeImage}
               >
-                <img src={src} alt={selected.name} className="pdp__thumb" />
+                <img src={src} alt="" loading="lazy" className="pdp__thumb" />
               </button>
             ))}
           </div>
         )}
 
         <section className="pdp__info">
-          <p className="pdp__creator">{selected.creator}</p>
           <h1 className="pdp__name">{selected.name}</h1>
           <p className="pdp__caption">{selected.caption}</p>
 
-          <div className="pdp__price-row">
-            <span className="pdp__mrp">{rs(selected.mrp)}</span>
-            <span className="pdp__price">{rs(selected.price)}</span>
-          </div>
-          <p className="pdp__taxes">Taxes included. Shipping calculated at checkout.</p>
+          <Price product={selected} className="pdp__price-min" />
+          <p className="pdp__taxes">Taxes included · Free shipping above {rs(BRAND.freeShippingAbove)}</p>
 
           <div className="pdp__field">
             <p className="pdp__field-label">Colour</p>
@@ -197,7 +199,7 @@ export default function ProductListing() {
               >
                 −
               </button>
-              <span>{quantity}</span>
+              <span aria-live="polite" aria-label={`Quantity ${quantity}`}>{quantity}</span>
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.min(9, q + 1))}
@@ -227,22 +229,17 @@ export default function ProductListing() {
               Buy it now
             </button>
           </div>
-          {confirmation && <p className="pdp__confirmation">{confirmation}</p>}
-
-          <p className="pdp__pickup">✓ Pickup available — usually ready in 24 hours</p>
+          <p className="pdp__confirmation" role="status">{confirmation}</p>
 
           <div className="accordion-list">
-            <AccordionRow title="About the product">
-              {selected.caption} Every piece ships in recyclable packaging with a
-              short care card inside.
-            </AccordionRow>
             <AccordionRow title="Shipping & delivery">
-              Orders dispatch within 2 business days. Standard shipping takes
-              5–7 days; priority shipping is available at checkout.
+              Orders dispatch within 2 business days and arrive in 5–7 days across India.
+              Shipping is free above {rs(BRAND.freeShippingAbove)}; below that we confirm the
+              charge on WhatsApp.
             </AccordionRow>
-            <AccordionRow title="Returns, refunds & exchanges">
-              Unused items can be returned within 14 days of delivery for a
-              full refund. Exchanges ship free.
+            <AccordionRow title="Returns & exchanges">
+              Unused items in original packaging can be returned or exchanged within
+              14 days of delivery.
             </AccordionRow>
             <AccordionRow title="Jewellery care">
               Keep away from water and perfume. Store flat in the pouch
@@ -266,7 +263,6 @@ export default function ProductListing() {
           </div>
         </section>
       </main>
-      <Newsletter />
       <Footer />
       <FloatingWidgets />
       <BottomNav />

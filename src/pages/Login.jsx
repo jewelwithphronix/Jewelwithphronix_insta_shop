@@ -64,7 +64,7 @@ export default function Login() {
 
   if (user) {
     return (
-      <main className="login">
+      <main className="login" id="main" tabIndex={-1}>
         <Link to="/" className="login__logo" aria-label={`${BRAND.name} home`}>
           <LogoMark size={64} letter={BRAND.initial} />
         </Link>
@@ -79,7 +79,7 @@ export default function Login() {
   }
 
   return (
-    <main className="login">
+    <main className="login" id="main" tabIndex={-1}>
       <Link to="/" className="login__logo" aria-label={`${BRAND.name} home`}>
         <LogoMark size={64} letter={BRAND.initial} />
       </Link>

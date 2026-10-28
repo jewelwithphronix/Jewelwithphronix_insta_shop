@@ -10,9 +10,10 @@ function TabInner({ tab }) {
     <>
       <span className="bnav__icon">
         {tab.icon}
-        {tab.badge !== undefined && <span className="bnav__badge">{tab.badge}</span>}
+        {tab.badge > 0 && <span className="bnav__badge" aria-hidden="true">{tab.badge}</span>}
       </span>
       {tab.label}
+      {tab.badge > 0 && <span className="sr-only">, {tab.badge}</span>}
     </>
   );
 }

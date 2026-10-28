@@ -5,7 +5,7 @@
   --tint: #f3e1d8;
   --tint-deep: #ecd2c4;
   --ink: #241c1a;
-  --ink-soft: #8a7a74;
+  --ink-soft: #6b5d58; /* 5.9:1 on white (was 4.1, below WCAG AA) */
   --line: #ece3df;
   --sale: #9c3b3b;
   /* header / announcement / bottom-nav theme */
@@ -1360,3 +1360,118 @@ button {
 .pdp__actions .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .login__back { margin-top: 40px; background: none; border: 0; font: inherit; font-size: 17px; font-weight: 600; color: var(--ink); cursor: pointer; }
 .login__back:hover { text-decoration: underline; }
+
+/* =====================================================
+   Accessibility + minimal layer
+   (comes last so it wins over older rules above)
+   ===================================================== */
+:root {
+  --wa: #128043;      /* WhatsApp buttons: white text 5.2:1 */
+  --badge: #c8102e;   /* discount badge: white text 5.9:1 */
+  --focus: #8e2646;
+}
+
+body { font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+/* visible keyboard focus everywhere, never on mouse click */
+:focus { outline: none; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+.login__field:focus-within, .ship__grid input:focus, .rform__field input:focus, .rform__field textarea:focus { outline: none; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 0; }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: fixed; top: 8px; left: 8px; z-index: 1000;
+  padding: 12px 18px; border-radius: 8px; background: var(--ink); color: #fff;
+  font-weight: 600; text-decoration: none; transform: translateY(-160%);
+}
+.skip-link:focus { transform: none; }
+#main:focus { outline: none; }
+
+/* readable colours */
+.cart-btn--wa, .fx-whatsapp { background: var(--wa) !important; }
+.cart-btn--wa:hover { background: #0e6a37 !important; }
+.discount-badge { background: var(--badge); }
+.card__wish { color: var(--ink); }
+.card__wish--liked { color: #d11a2a; }
+
+/* comfortable tap targets (44px) */
+.card__wish { width: 40px; height: 40px; top: 8px; right: 8px; }
+.stepper button { min-width: 44px; min-height: 44px; }
+.announce__arrow { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.hdr__icon, .hdr__burger { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+.hdr__icon--desk { display: none; }
+@media (min-width: 1024px) { .hdr__icon--desk { display: flex; } }
+.hdr__icons { gap: 4px; }
+
+/* respect "reduce motion" */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+  .float-heart, .big-heart { display: none !important; }
+}
+
+/* search: native clear "x" hidden (we have our own) */
+.search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.search-input:focus-visible { outline: none; }
+[role="search"] > div:focus-within { border-color: var(--ink); box-shadow: 0 0 0 2px var(--focus); }
+
+/* minimal footer */
+.foot { background: #fff; border-top: 1px solid var(--line); padding-top: 40px; }
+.foot__inner--min {
+  max-width: 1200px; display: grid; gap: 32px; grid-template-columns: 1fr;
+  padding: 0 24px 32px;
+}
+@media (min-width: 768px) { .foot__inner--min { grid-template-columns: 1.4fr 1fr 1.4fr; } }
+.foot__brand { display: flex; gap: 14px; align-items: center; }
+.foot__brand .foot__logo { margin: 0; }
+.foot__name { margin: 0; font-size: 18px; font-weight: 600; }
+.foot__tagline { margin: 2px 0 0; font-size: 15px; color: var(--ink-soft); }
+.foot .foot__title { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 14px; }
+.foot__links { gap: 10px; }
+.foot__links a { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; color: var(--ink); font-size: 15px; }
+.foot__muted { color: var(--ink-soft); font-size: 14px; }
+.foot__bottom--min { max-width: 1200px; margin: 0 auto; padding: 18px 24px 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; text-align: left; }
+.foot__bottom--min p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+
+/* product cards: real <img>, separate link + like button */
+.card { position: relative; }
+.card__image { overflow: hidden; background: #f6f1ee; }
+.card__media, .card__swatch { position: absolute; inset: 0; display: block; }
+.card__image img { position: absolute; inset: 0; }
+.card__name { font-family: var(--sans); font-size: 15px; font-weight: 500; margin: 0 0 4px; line-height: 1.35; }
+.card__link { color: var(--ink); text-decoration: none; }
+.card__link::after { content: ""; position: absolute; inset: 0; z-index: 1; } /* whole card is clickable */
+.card__wish, .discount-badge { z-index: 3; }
+.card:hover .card__link { text-decoration: underline; text-underline-offset: 3px; }
+.discount-badge { font-size: 12px; letter-spacing: 0.02em; text-transform: none; }
+
+/* prices: ₹6,149 ₹̶1̶2̶,̶4̶9̶9̶ */
+.price { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.price__now { font-weight: 600; color: var(--ink); }
+.price__was { color: var(--ink-soft); font-size: 0.9em; }
+.pdp__price-min { margin: 14px 0 4px; font-size: 24px; }
+.pdp__price-min .price__was { font-size: 17px; }
+
+/* product page */
+.pdp__hero img { position: absolute; inset: 0; }
+.pdp__hero-wish { z-index: 3; width: 44px; height: 44px; }
+.pdp__thumb-btn { min-width: 44px; min-height: 44px; }
+.pdp__confirmation { min-height: 1.4em; color: #1f6b3a; font-size: 15px; font-weight: 500; }
+.pdp__taxes { color: var(--ink-soft); }
+.pdp__name { line-height: 1.25; }
+
+/* section headings + calmer announcement bar */
+.section-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+@media (min-width: 640px) { .section-title { font-size: 28px; } }
+.announce__text { font-size: 14px; font-weight: 500; }
+.contact__label { display: block; margin: 12px 0 -4px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.contact__label span { color: var(--ink-soft); font-weight: 400; }
+.foot { font-family: var(--sans); }
+.foot__brand .foot__logo { width: auto; height: auto; background: none; border: 0; flex-shrink: 0; }
+.foot__name { font-family: var(--serif); }

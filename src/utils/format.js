@@ -1,9 +1,10 @@
-// 5899 -> "Rs. 5,899.00"
+// 5899 -> "₹5,899"   (paise shown only when there are any: 5899.5 -> "₹5,899.50")
 export function rs(amount) {
   const n = Number(amount) || 0;
+  const whole = Number.isInteger(n);
   return (
-    "Rs. " +
-    n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    "₹" +
+    n.toLocaleString("en-IN", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 })
   );
 }
 

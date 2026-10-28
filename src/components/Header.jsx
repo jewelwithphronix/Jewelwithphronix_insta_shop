@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BRAND } from "../config/brand.js";
 import SearchBar from "./SearchBar.jsx";
@@ -38,6 +38,8 @@ function NavItem({ item, onClick }) {
 
 export default function Header({ showSearch = false }) {
   const [open, setOpen] = useState(false);
+  const burgerRef = useRef(null);
+  const panelRef = useRef(null);
   const { total } = useLikes();
   const { count: cartCount } = useCart();
 
@@ -48,9 +50,12 @@ export default function Header({ showSearch = false }) {
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    panelRef.current?.querySelector("a, button")?.focus(); // keyboard focus moves into the menu
+    const burger = burgerRef.current;
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      burger?.focus(); // ...and back to the menu button when it closes
     };
   }, [open]);
 
@@ -58,7 +63,7 @@ export default function Header({ showSearch = false }) {
     <>
       <header className="hdr">
         <div className="hdr__main">
-          <button type="button" className="hdr__burger" aria-label="Open menu" onClick={() => setOpen(true)}>
+          <button type="button" ref={burgerRef} className="hdr__burger" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}>
             <MenuIcon size={30} />
           </button>
 
@@ -81,11 +86,11 @@ export default function Header({ showSearch = false }) {
           <div className="hdr__icons">
             <Link to="/search" className="hdr__icon hdr__icon--desk" aria-label="Search"><SearchIcon size={28} /></Link>
             <AccountButton wrapperClass="hdr__icon hdr__icon--desk" placement="down"><UserIcon size={28} /></AccountButton>
-            <Link to="/wishlist" className="hdr__icon hdr__icon--badge" aria-label="Wishlist">
+            <Link to="/wishlist" className="hdr__icon hdr__icon--badge" aria-label={`Wishlist${total ? `, ${total} saved` : ""}`}>
               <HeartIcon size={28} />
               {total > 0 && <span className="hdr__badge">{total}</span>}
             </Link>
-            <Link to="/cart" className="hdr__icon hdr__icon--badge" aria-label="Cart">
+            <Link to="/cart" className="hdr__icon hdr__icon--badge" aria-label={`Cart${cartCount ? `, ${cartCount} items` : ""}`}>
               <BagIcon size={28} />
               {cartCount > 0 && <span className="hdr__badge">{cartCount}</span>}
             </Link>
@@ -102,9 +107,9 @@ export default function Header({ showSearch = false }) {
 
       {/* Menu drawer (mobile + desktop) */}
       {open && (
-        <div className="drawer" role="dialog" aria-modal="true">
+        <div className="drawer" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="drawer__overlay" onClick={() => setOpen(false)} />
-          <aside className="drawer__panel">
+          <aside className="drawer__panel" ref={panelRef}>
             <div className="drawer__top">
               <span className="hdr__logo-name">{BRAND.name}</span>
               <button type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
@@ -119,6 +124,8 @@ export default function Header({ showSearch = false }) {
           </aside>
         </div>
       )}
+      {/* "Skip to content" lands here, right after the header */}
+      <div id="main" tabIndex={-1} />
     </>
   );
 }

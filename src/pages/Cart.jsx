@@ -9,7 +9,7 @@ import { useAuth } from "../utils/auth.js";
 import AnnouncementBar from "../components/AnnouncementBar.jsx";
 import Header from "../components/Header.jsx";
 import BottomNav from "../components/BottomNav.jsx";
-import Footer, { Newsletter } from "../components/Footer.jsx";
+import Footer from "../components/Footer.jsx";
 import FloatingWidgets from "../components/FloatingWidgets.jsx";
 
 const FREE_SHIPPING_ABOVE = BRAND.freeShippingAbove;
@@ -228,7 +228,6 @@ export default function Cart() {
         </section>
       )}
 
-      <Newsletter />
       <Footer />
       <FloatingWidgets />
       <BottomNav />

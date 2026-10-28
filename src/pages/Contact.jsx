@@ -20,7 +20,7 @@ export default function Contact() {
   return (
     <PageShell>
       <main className="page">
-        <h1 className="font-serif text-2xl font-semibold sm:text-3xl">Contact Us</h1>
+        <h1 className="font-serif text-2xl font-semibold sm:text-3xl">Contact us</h1>
         <p className="page__sub">We usually reply within a day.</p>
         <div className="contact">
           <div className="contact__info">
@@ -32,9 +32,12 @@ export default function Contact() {
           </div>
           <form className="contact__form" onSubmit={send} noValidate>
             <h2>Send a message</h2>
-            <input placeholder="Your name" value={f.name} onChange={set("name")} />
-            <input type="email" placeholder="Email (optional)" value={f.email} onChange={set("email")} />
-            <textarea rows={5} placeholder="How can we help?" value={f.message} onChange={set("message")} />
+            <label className="contact__label" htmlFor="c-name">Your name</label>
+            <input id="c-name" autoComplete="name" value={f.name} onChange={set("name")} />
+            <label className="contact__label" htmlFor="c-email">Email <span>(optional)</span></label>
+            <input id="c-email" type="email" autoComplete="email" value={f.email} onChange={set("email")} />
+            <label className="contact__label" htmlFor="c-msg">How can we help?</label>
+            <textarea id="c-msg" rows={5} value={f.message} onChange={set("message")} />
             {err && <p className="login__error" role="alert">{err}</p>}
             <button type="submit" className="cart-btn cart-btn--wa"><WhatsAppIcon size={20} /> Send on WhatsApp</button>
           </form>

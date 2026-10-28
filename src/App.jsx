@@ -31,6 +31,9 @@ const Open = (el) => el; // public pages
 
 export default function App() {
   return (
+    <>
+    {/* first thing keyboard users reach on every page */}
+    <a href="#main" className="skip-link">Skip to content</a>
     <Routes>
       <Route path="/" element={Open(<Home />)} />
       <Route path="/product/:id" element={Open(<ProductListing />)} />
@@ -45,5 +48,6 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/admin" element={<Admin />} />
     </Routes>
+    </>
   );
 }
