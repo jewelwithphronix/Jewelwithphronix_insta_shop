@@ -1348,3 +1348,15 @@ button {
 }
 .acct__btn:hover { background: var(--crimson); }
 @keyframes acctPop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* cart: totals, sold out, order sent */
+.cart__sub--offer b { color: #1f8a4c; }
+.cart__sub--total { border-top: 1px solid #eadfd8; padding-top: 10px; font-size: 1.1em; }
+.cart__soldout { margin: 4px 0 0; color: #c0152f; font-size: 14px; font-weight: 600; }
+.cart-done__note { margin-top: 12px !important; font-size: 17px !important; color: #555; max-width: 520px; }
+.cart-done__wa { width: 100%; max-width: 360px; margin: 24px 0 12px; }
+.cart__sub + .cart__sub { margin-top: 8px; }
+.discount-badge--soldout { background: #333 !important; }
+.pdp__soldout { margin: 16px 0 0; color: #c0152f; font-weight: 600; }
+.pdp__actions .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.login__back { margin-top: 40px; background: none; border: 0; font: inherit; font-size: 17px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.login__back:hover { text-decoration: underline; }

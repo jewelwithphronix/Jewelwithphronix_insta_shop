@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "../lib/supabase.js";
 
-// Customer sign-in. Google sign-in Supabase kartay; email sign-in ya browser madhe save hoto.
+// Customer sign-in. Fakt Google (Supabase) — email Google ne verify kelela asto.
 const KEY = "authUser";
 
 function load() {
@@ -27,6 +27,10 @@ function commit(next) {
 
 // Google (kinva Supabase) login zala ki aapoaap customer sign in hoto
 if (supabase) {
+  // junya (verify na kelelya) email sign-in che user sign out kara: Supabase session nasel tar user nahi
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session && user) commit(null);
+  });
   supabase.auth.onAuthStateChange((event, session) => {
     const u = session?.user;
     if (u?.email) {
@@ -39,8 +43,6 @@ if (supabase) {
     }
   });
 }
-
-export const signIn = (u) => commit({ ...u, signedInAt: Date.now() });
 
 export function signOut() {
   commit(null);

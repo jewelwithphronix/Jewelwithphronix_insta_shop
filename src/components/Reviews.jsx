@@ -1,5 +1,9 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useReviews, addReview, deleteReview } from "../utils/reviews.js";
+import { useAuth } from "../utils/auth.js";
+import { supabase } from "../lib/supabase.js";
+import { BRAND } from "../config/brand.js";
 
 function Stars({ value, size = 20 }) {
   return (
@@ -13,6 +17,12 @@ function Stars({ value, size = 20 }) {
 
 export default function Reviews({ productId }) {
   const { list, count, avg } = useReviews(productId);
+  const user = useAuth();
+  const location = useLocation();
+  const isAdmin = user?.email?.toLowerCase() === BRAND.adminEmail.toLowerCase();
+  // Supabase asel tar review lihayla sign in lagto (email verify asto)
+  const mustSignIn = !!supabase && !user;
+  const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
@@ -26,12 +36,19 @@ export default function Reviews({ productId }) {
     setRating(0); setHover(0); setName(""); setTitle(""); setText(""); setError("");
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
     if (!rating) return setError("Please select a star rating.");
     if (!name.trim()) return setError("Please enter your name.");
     if (text.trim().length < 5) return setError("Please write your review.");
-    addReview(productId, { name: name.trim(), rating, title: title.trim(), text: text.trim() });
+    setBusy(true);
+    try {
+      await addReview(productId, { name: name.trim(), rating, title: title.trim(), text: text.trim(), userEmail: user?.email });
+    } catch (x) {
+      setBusy(false);
+      return setError("Couldn't post your review. Please try again. (" + x.message + ")");
+    }
+    setBusy(false);
     reset();
     setOpen(false);
     setThanks(true);
@@ -53,11 +70,19 @@ export default function Reviews({ productId }) {
 
       {thanks && <p className="reviews__thanks" role="status">Thank you! Your review has been posted ✓</p>}
 
-      {!open && (
-        <button type="button" className="btn btn--solid" onClick={() => { setOpen(true); setThanks(false); }}>
+      {!open && (mustSignIn ? (
+        <Link to="/login" state={{ from: location.pathname }} className="btn btn--solid" style={{ textDecoration: "none" }}>
+          Sign in to write a review
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className="btn btn--solid"
+          onClick={() => { setOpen(true); setThanks(false); if (!name && user?.name) setName(user.name); }}
+        >
           Write a review
         </button>
-      )}
+      ))}
 
       {open && (
         <form className="rform" onSubmit={submit} noValidate>
@@ -102,7 +127,7 @@ export default function Reviews({ productId }) {
             <button type="button" className="btn btn--outline" onClick={() => { reset(); setOpen(false); }}>
               Cancel
             </button>
-            <button type="submit" className="btn btn--solid">Submit review</button>
+            <button type="submit" className="btn btn--solid" disabled={busy}>{busy ? "Posting…" : "Submit review"}</button>
           </div>
         </form>
       )}
@@ -119,7 +144,14 @@ export default function Reviews({ productId }) {
               <p className="rlist__text">{r.text}</p>
               <p className="rlist__by">
                 {r.name}
-                <button type="button" onClick={() => deleteReview(productId, r.id)}>Delete</button>
+                {(!supabase || isAdmin || (user && r.userEmail === user.email)) && (
+                  <button
+                    type="button"
+                    onClick={() => confirm("Delete this review?") && deleteReview(productId, r.id).catch((x) => alert(x.message))}
+                  >
+                    Delete
+                  </button>
+                )}
               </p>
             </li>
           ))}

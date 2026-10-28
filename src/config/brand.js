@@ -7,6 +7,9 @@ export const BRAND = {
     "Get Free Shipping above ₹5000",
     "Flat 20% OFF on orders above ₹1,00,000",
   ],
+  freeShippingAbove: 5000, // cart madhe free shipping progress bar
+  shippingFee: null, // shipping charge (₹) below freeShippingAbove; null = "confirmed on WhatsApp"
+  bulkOffer: { above: 100000, percent: 20 }, // announcement madhla "Flat 20% OFF above ₹1,00,000"
   pickupStore: "Jewelwithphronix,Nashik", // shown under "Pickup available at"
   whatsapp: "+91 92724 71332",
   email: "teamphronix@gmail.com",

@@ -23,6 +23,7 @@ export default function ProductListing() {
 
   const { isLiked } = useLikes();
   const wished = isLiked(selected.id);
+  const soldOut = selected.inStock === false;
   const [activeImage, setActiveImage] = useState(selected.images?.[0]);
   const [quantity, setQuantity] = useState(1);
   const [confirmation, setConfirmation] = useState("");
@@ -207,9 +208,11 @@ export default function ProductListing() {
             </div>
           </div>
 
+          {soldOut && <p className="pdp__soldout">Sold out — message us on WhatsApp to know when it's back.</p>}
           <div className="pdp__actions">
             <button
               type="button"
+              disabled={soldOut}
               className="btn btn--outline"
               onClick={() => { addToCart(selected, quantity); showConfirmation(`Added ${quantity} to your cart ✓`); }}
             >
@@ -217,6 +220,7 @@ export default function ProductListing() {
             </button>
             <button
               type="button"
+              disabled={soldOut}
               className="btn btn--solid"
               onClick={() => { addToCart(selected, quantity); navigate("/cart"); }}
             >

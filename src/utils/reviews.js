@@ -1,10 +1,12 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useEffect } from "react";
+import { supabase } from "../lib/supabase.js";
 
-// Reviews are saved in this browser (localStorage), grouped by product id.
-// { p1: [{ id, name, rating, title, text, date }], p2: [...] }
+// Reviews Supabase chya "reviews" table madhe save hotat, mhanun sarva customers la distat.
+// Supabase connect nasel tar junya sarkhe fakt ya browser madhe (localStorage) save hotat.
+// { p1: [{ id, name, rating, title, text, date, userEmail }], p2: [...] }
 const KEY = "productReviews";
 
-function load() {
+function loadLocal() {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) || "{}");
     return v && typeof v === "object" ? v : {};
@@ -13,15 +15,18 @@ function load() {
   }
 }
 
-let state = load();
+let state = supabase ? {} : loadLocal();
+const fetched = new Set();
 const listeners = new Set();
 
 function commit(next) {
   state = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* storage blocked: keep working in memory */
+  if (!supabase) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      /* storage blocked: keep working in memory */
+    }
   }
   listeners.forEach((l) => l());
 }
@@ -31,26 +36,72 @@ function subscribe(l) {
   return () => listeners.delete(l);
 }
 
-if (typeof window !== "undefined") {
+const fromRow = (r) => ({
+  id: r.id,
+  name: r.name,
+  rating: r.rating,
+  title: r.title || "",
+  text: r.body,
+  date: r.created_at,
+  userEmail: r.user_email,
+});
+
+async function fetchReviews(productId) {
+  const { data, error } = await supabase
+    .from("reviews").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+  if (error) return console.error("Reviews load error:", error.message);
+  commit({ ...state, [productId]: data.map(fromRow) });
+}
+
+if (supabase && typeof window !== "undefined") {
+  // navin review / delete jhala ki ughadlelya product page var lagech update
+  supabase
+    .channel("reviews-live")
+    .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, (p) => {
+      const pid = p.new?.product_id || p.old?.product_id;
+      if (pid && fetched.has(pid)) fetchReviews(pid);
+      else if (p.eventType === "DELETE") fetched.forEach(fetchReviews);
+    })
+    .subscribe();
+} else if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
-    if (e.key === KEY) {
-      state = load();
-      listeners.forEach((l) => l());
-    }
+    if (e.key === KEY) commit(loadLocal());
   });
 }
 
-export function addReview(productId, review) {
-  const entry = { id: Date.now().toString(36), date: new Date().toISOString(), ...review };
-  commit({ ...state, [productId]: [entry, ...(state[productId] || [])] });
+export async function addReview(productId, review) {
+  if (!supabase) {
+    const entry = { id: Date.now().toString(36), date: new Date().toISOString(), ...review };
+    commit({ ...state, [productId]: [entry, ...(state[productId] || [])] });
+    return;
+  }
+  const { error } = await supabase.from("reviews").insert({
+    product_id: productId,
+    name: review.name,
+    rating: review.rating,
+    title: review.title,
+    body: review.text,
+    user_email: review.userEmail,
+  });
+  if (error) throw new Error(error.message);
+  await fetchReviews(productId);
 }
 
-export function deleteReview(productId, reviewId) {
+export async function deleteReview(productId, reviewId) {
+  if (supabase) {
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+    if (error) throw new Error(error.message);
+  }
   commit({ ...state, [productId]: (state[productId] || []).filter((r) => r.id !== reviewId) });
 }
 
 export function useReviews(productId) {
   const s = useSyncExternalStore(subscribe, () => state);
+  useEffect(() => {
+    if (!supabase || fetched.has(productId)) return;
+    fetched.add(productId);
+    fetchReviews(productId);
+  }, [productId]);
   const list = s[productId] || [];
   const avg = list.length ? list.reduce((n, r) => n + r.rating, 0) / list.length : 0;
   return { list, count: list.length, avg };

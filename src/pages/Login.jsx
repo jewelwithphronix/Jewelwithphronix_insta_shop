@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { BRAND } from "../config/brand.js";
-import { useAuth, signIn, signOut, signInWithGoogle } from "../utils/auth.js";
-import { LogoMark, ArrowRight } from "../components/Icons.jsx";
+import { useAuth, signOut, signInWithGoogle } from "../utils/auth.js";
+import { LogoMark } from "../components/Icons.jsx";
 
 const GoogleG = () => (
   <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
@@ -18,9 +18,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || "/";
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [news, setNews] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,14 +61,6 @@ export default function Login() {
     }
   }
 
-  function handleEmail(e) {
-    e.preventDefault();
-    if (!name.trim()) return setError("Please enter your name.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError("Please enter a valid email address.");
-    setError("");
-    signIn({ name: name.trim(), email: email.trim(), news });
-    navigate(from, { replace: true });
-  }
 
   if (user) {
     return (
@@ -97,54 +86,31 @@ export default function Login() {
 
       <section className="login__box">
         <h1 className="login__title">Sign in</h1>
-        <p className="login__sub">Sign in or create an account</p>
+        <p className="login__sub">
+          {from === "/cart"
+            ? "Sign in to place your order. Your cart is saved."
+            : "Sign in or create an account with Google"}
+        </p>
 
         <button type="button" className="login__btn login__btn--google" onClick={handleGoogle} disabled={busy}>
           <GoogleG />
           {busy ? "Opening Google…" : "Continue with Google"}
         </button>
 
-        <div className="login__or"><span>or</span></div>
-
-        <form onSubmit={handleEmail} noValidate>
-          <div className="login__field" style={{ marginBottom: 10 }}>
-            <input
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              aria-label="Name"
-            />
-          </div>
-          <div className={"login__field" + (error ? " login__field--error" : "")}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              aria-label="Email"
-            />
-            <button type="submit" aria-label="Continue">
-              <ArrowRight size={22} />
-            </button>
-          </div>
-
-          {error && <p className="login__error" role="alert">{error}</p>}
-
-          <label className="login__check">
-            <input type="checkbox" checked={news} onChange={(e) => setNews(e.target.checked)} />
-            <span>Email me with news and offers</span>
-          </label>
-        </form>
+        {error && <p className="login__error" role="alert">{error}</p>}
 
         <p className="login__terms">
           By continuing, you agree to our <a href="#terms">Terms of service</a>
         </p>
       </section>
 
-      <a href="#privacy" className="login__privacy">Privacy policy</a>
+      <button
+        type="button"
+        className="login__back"
+        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+      >
+        ← Back to shopping
+      </button>
     </main>
   );
 }

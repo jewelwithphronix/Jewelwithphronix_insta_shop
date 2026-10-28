@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { BRAND } from "./config/brand.js";
 import { useAuth } from "./utils/auth.js";
+import { supabase } from "./lib/supabase.js";
 import Home from "./pages/Home.jsx";
 import ProductListing from "./pages/ProductListing.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
@@ -19,7 +20,8 @@ import Admin from "./admin/Admin.jsx";
 function Protected({ children }) {
   const user = useAuth();
   const location = useLocation();
-  if (BRAND.requireLogin && !user) {
+  // Supabase nasel tar Google sign-in shakya nahi, mhanun tevha login maagu naka
+  if (BRAND.requireLogin && supabase && !user) {
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   return children;

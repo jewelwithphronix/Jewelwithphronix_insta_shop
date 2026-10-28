@@ -7,9 +7,8 @@ import { discountPercent } from "../utils/productStore.js";
 
 export default function ProductCard({ product, variant = "default" }) {
   const boxed = variant === "boxed";
-  const { isLiked, likeCount: getCount } = useLikes();
+  const { isLiked } = useLikes();
   const liked = isLiked(product.id);
-  const likeCount = getCount(product);
   const [bigHeart, setBigHeart] = useState(0); // double-click heart (counter restarts the animation)
   const [hearts, setHearts] = useState([]); // floating hearts
   const cover = product.images?.[0];
@@ -57,7 +56,9 @@ export default function ProductCard({ product, variant = "default" }) {
         }
         onDoubleClick={handleDoubleClick}
       >
-        {off > 0 && <span className="discount-badge">{off}% OFF</span>}
+        {product.inStock === false ? (
+          <span className="discount-badge discount-badge--soldout">Sold out</span>
+        ) : off > 0 && <span className="discount-badge">{off}% OFF</span>}
         <button
           type="button"
           className={`card__wish ${liked ? 'card__wish--liked' : ''}`}
@@ -99,11 +100,6 @@ export default function ProductCard({ product, variant = "default" }) {
           <span className="card__mrp">{rs(product.mrp)}</span>
           <span className="card__sale">{rs(product.price)}</span>
         </p>
-        {!boxed && (
-          <p className="card__likes">
-            {likeCount} {likeCount === 1 ? 'like' : 'likes'}
-          </p>
-        )}
       </div>
     </Link>
   );

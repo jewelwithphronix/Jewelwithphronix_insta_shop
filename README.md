@@ -48,5 +48,13 @@ URL per product (`/product/p1`, `/product/p2`, ...).
    `public/_redirects` (Netlify) already do this; add the same env vars in the
    host's dashboard.
 
+## Database rules (run once in Supabase → SQL Editor)
+
+1. `supabase/admin-only-writes.sql` — only the admin email can change products and product photos.
+2. `supabase/slides-and-reviews.sql` — only the admin can change the home slider; creates the shared
+   `reviews` table (signed-in customers post, everyone reads, admin can delete any review).
+
+Shipping charge and the bulk offer live in `src/config/brand.js` (`shippingFee`, `bulkOffer`).
+
 Replace the flat color swatches in `products.js` with real image or video
 URLs (e.g. an `<img>`/`<video>` in `ReelCard`) once you have media assets.
