@@ -1475,3 +1475,33 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
 .foot { font-family: var(--sans); }
 .foot__brand .foot__logo { width: auto; height: auto; background: none; border: 0; flex-shrink: 0; }
 .foot__name { font-family: var(--serif); }
+
+/* cart layout: items + address on the left, summary pinned on the right */
+.ship__grid input { width: 100%; min-width: 0; }
+.ship__grid label { min-width: 0; }
+.cart__summary { margin-top: 20px; }
+@media (min-width: 900px) {
+  .cart {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-areas: "head head" "list summary" "ship summary";
+    column-gap: 40px;
+  }
+  .cart__head { grid-area: head; }
+  .cart__list { grid-area: list; }
+  .ship { grid-area: ship; margin-top: 28px; }
+  .cart__summary { grid-area: summary; align-self: start; margin-top: 0; position: sticky; top: 20px; }
+}
+.cart__item:first-child { border-top: 1px solid var(--line); }
+.cart__list { border-bottom: 1px solid var(--line); }
+/* phones: line total sits under the details instead of squeezing a 3rd column */
+.cart__item { grid-template-columns: 80px minmax(0, 1fr); gap: 14px; }
+.cart__img { width: 80px; height: 80px; }
+.cart__line-total { grid-column: 2; font-size: 15px; }
+.cart__line-total::before { content: "Total: "; font-weight: 400; color: var(--ink-soft); }
+.cart__name { overflow-wrap: anywhere; }
+@media (min-width: 600px) {
+  .cart__item { grid-template-columns: 96px minmax(0, 1fr) auto; gap: 16px; }
+  .cart__img { width: 96px; height: 96px; }
+  .cart__line-total { grid-column: auto; font-size: 16px; }
+  .cart__line-total::before { content: none; }
+}
