@@ -201,3 +201,23 @@
 .adm { width: 100%; max-width: none; margin: 0; }
 .adm--login { max-width: none; padding-top: 20px; }
 body:has(.adm) #root { padding-bottom: 0; background: #faf6f4; }
+
+/* ---------- Tabs + home slider ---------- */
+.adm__tabs { display: flex; gap: 8px; margin: 0 auto 16px; }
+.adm__tabs button {
+  padding: 9px 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--maroon);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.adm__tabs button.is-on { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+.adm__thumb--wide { width: 160px; height: 80px; }
+.adm__slidepreview { display: block; width: 100%; max-width: 480px; aspect-ratio: 2 / 1; margin-bottom: 10px; object-fit: cover; border: 1px solid var(--line); border-radius: 12px; }
+.adm__hint { margin: 6px 0 0; font-size: 12px; color: var(--ink-soft); }
+.adm__move { display: flex; gap: 8px; }
+.adm__move .adm__link { flex: 1; padding: 6px 14px; }
+.adm__move .adm__link:disabled { opacity: 0.4; cursor: default; }

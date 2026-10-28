@@ -1,38 +1,21 @@
 import { useState, useEffect } from "react";
-
-const slides = [
-  {
-    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1200&h=600&fit=crop",
-    title: "New Collection",
-    subtitle: "Discover our latest handcrafted pieces"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=1200&h=600&fit=crop",
-    title: "Festive Collection",
-    subtitle: "Timeless jewellery for every celebration"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=1200&h=600&fit=crop",
-    title: "Bridal Collection",
-    subtitle: "Elegance crafted for your special day"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1200&h=600&fit=crop",
-    title: "Classic Pieces",
-    subtitle: "Timeless designs that never go out of style"
-  }
-];
+import { useSlides, DEFAULT_SLIDES } from "../utils/slideStore.js";
 
 export default function CollectionCarousel() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // Admin panel madhun add kelele slides; ek pan nasel tar default slides
+  const stored = useSlides();
+  const slides = stored.length ? stored : DEFAULT_SLIDES;
+  const [slideIndex, setCurrentSlide] = useState(0);
+  const currentSlide = slideIndex % slides.length;
 
   useEffect(() => {
+    if (slides.length < 2) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 3500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -44,7 +27,7 @@ export default function CollectionCarousel() {
       <div className="relative h-full w-full">
         {slides.map((slide, index) => (
           <div
-            key={index}
+            key={slide.id ?? index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
               index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
@@ -57,22 +40,29 @@ export default function CollectionCarousel() {
             {/* Gradient overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
             
-            {/* Text overlay */}
-            <div className="absolute inset-0 flex items-center justify-center p-6">
-              <div className="text-center text-white">
-                <h2 className="font-serif text-3xl font-semibold sm:text-4xl lg:text-6xl">
-                  {slide.title}
-                </h2>
-                <p className="mt-2 text-sm sm:text-base lg:text-xl">
-                  {slide.subtitle}
-                </p>
+            {/* Text overlay (title / subtitle blank asel tar dakhvat nahi) */}
+            {(slide.title || slide.subtitle) && (
+              <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="text-center text-white">
+                  {slide.title && (
+                    <h2 className="font-serif text-3xl font-semibold sm:text-4xl lg:text-6xl">
+                      {slide.title}
+                    </h2>
+                  )}
+                  {slide.subtitle && (
+                    <p className="mt-2 text-sm sm:text-base lg:text-xl">
+                      {slide.subtitle}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Dot indicators */}
+      {slides.length > 1 && (
       <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
         {slides.map((_, index) => (
           <button
@@ -87,6 +77,7 @@ export default function CollectionCarousel() {
           />
         ))}
       </div>
+      )}
     </div>
   );
 }

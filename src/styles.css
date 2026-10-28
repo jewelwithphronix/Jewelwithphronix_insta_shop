@@ -969,6 +969,13 @@ button {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .fx-whatsapp:hover { transform: scale(1.07); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); }
+/* smaller button */
+.fx-whatsapp { width: 44px; height: 44px; }
+.fx-whatsapp svg { width: 24px; height: 24px; }
+@media (min-width: 1024px) {
+  .fx-whatsapp { width: 56px; height: 56px; }
+  .fx-whatsapp svg { width: 30px; height: 30px; }
+}
 
 /* =====================================================
    Sign-in page (/login)
@@ -1259,3 +1266,85 @@ button {
 .adm__img img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 .adm__img button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: #333; color: #fff; cursor: pointer; line-height: 1; }
 .adm__actions { display: flex; gap: 12px; }
+/* =====================================================
+   Discount badge (auto from MRP vs selling price)
+   ===================================================== */
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #e5173f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+.discount-badge--lg {
+  top: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* =====================================================
+   Delivery address form (cart)
+   ===================================================== */
+.ship { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.ship__title { margin: 0 0 12px; font-family: var(--serif); font-size: 22px; font-weight: 500; }
+.ship__loc { margin-bottom: 14px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px; cursor: pointer; }
+.ship__loc:disabled { opacity: 0.6; cursor: wait; }
+.ship__grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.ship__grid label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+.ship__grid input { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 16px; color: var(--ink); font-family: inherit; }
+.ship__grid input:focus { outline: 2px solid var(--maroon); outline-offset: -1px; }
+.ship__err { margin: 12px 0 0; color: #c0152f; font-size: 14px; }
+@media (min-width: 600px) {
+  .ship__grid { grid-template-columns: 1fr 1fr; }
+  .ship__wide { grid-column: 1 / -1; }
+}
+.cart-btn--wa:disabled { opacity: 0.7; cursor: wait; }
+
+/* =====================================================
+   Account popup (profile icon, signed-out)
+   ===================================================== */
+.acct { position: relative; }
+.acct > button { background: none; border: 0; padding: 0; color: inherit; cursor: pointer; display: flex; }
+.bnav__acct { flex: 1; display: flex; }
+.bnav__acct > .bnav__tab, .bnav__acct > .acct__trigger { flex: 1; background: none; border: 0; padding: 0; font-family: inherit; }
+.bnav__acct.acct > button { flex: 1; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+.acct__pop {
+  position: absolute;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  white-space: nowrap;
+  font-size: 14px;
+  box-shadow: 0 6px 20px rgba(36, 28, 26, 0.14);
+  animation: acctPop 0.15s ease;
+}
+.acct__pop--down { top: calc(100% + 12px); right: -8px; }
+.acct__pop--up { bottom: calc(100% + 14px); right: 4px; }
+.acct__text { margin: 0; color: var(--ink); }
+.acct__btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: var(--maroon);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+.acct__btn:hover { background: var(--crimson); }
+@keyframes acctPop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

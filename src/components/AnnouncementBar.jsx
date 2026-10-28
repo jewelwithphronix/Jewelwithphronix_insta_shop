@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BRAND } from "../config/brand.js";
-import { ChevronLeft, ChevronRight, InstagramIcon, YoutubeIcon } from "./Icons.jsx";
+import { ChevronLeft, ChevronRight, InstagramIcon } from "./Icons.jsx";
 
 export default function AnnouncementBar() {
   const messages = BRAND.announcements;
@@ -19,8 +19,7 @@ export default function AnnouncementBar() {
   return (
     <div className="announce">
       <div className="announce__social">
-        <a href="#" aria-label="Instagram" onClick={(e) => e.preventDefault()}><InstagramIcon size={22} /></a>
-        <a href="#" aria-label="YouTube" onClick={(e) => e.preventDefault()}><YoutubeIcon size={24} /></a>
+        <a href={BRAND.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><InstagramIcon size={22} /></a>
       </div>
       <div className="announce__inner">
         <button type="button" className="announce__arrow" onClick={prev} aria-label="Previous announcement">

@@ -10,6 +10,7 @@ export const BRAND = {
   pickupStore: "Jewelwithphronix,Nashik", // shown under "Pickup available at"
   whatsapp: "+91 92724 71332",
   email: "teamphronix@gmail.com",
+  instagram: "https://www.instagram.com/jewelwithphronix?vrfl=MTR2YTV2NGk5amNrNQ==",
   gst: "YOUR-GST-NUMBER",
   requireLogin: true, // true = aadhi sign in kara
   // adminPassword: "phronix@admin", // he BADLA

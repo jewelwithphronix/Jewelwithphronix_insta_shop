@@ -8,14 +8,14 @@ import Login from "./pages/Login.jsx";
 import Wishlist from "./pages/Wishlist.jsx";
 import Cart from "./pages/Cart.jsx";
 import Shop from "./pages/Shop.jsx";
-import Clearance from "./pages/Clearance.jsx";
 import Catalog from "./pages/Catalog.jsx";
 import Returns from "./pages/Returns.jsx";
 import Contact from "./pages/Contact.jsx";
 import Faq from "./pages/Faq.jsx";
 import Admin from "./admin/Admin.jsx";
 
-// Sign in nasel tar /login var pathavto (brand.js madhe requireLogin: false kelyas band hoto)
+// Browsing is open to everyone. Only checkout (/cart) needs sign in.
+// Not signed in -> /login, then back here after signing in (set requireLogin: false in brand.js to turn off).
 function Protected({ children }) {
   const user = useAuth();
   const location = useLocation();
@@ -25,20 +25,20 @@ function Protected({ children }) {
   return children;
 }
 const P = (el) => <Protected>{el}</Protected>;
+const Open = (el) => el; // public pages
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={P(<Home />)} />
-      <Route path="/product/:id" element={P(<ProductListing />)} />
-      <Route path="/search" element={P(<SearchResults />)} />
-      <Route path="/shop" element={P(<Shop />)} />
-      <Route path="/clearance" element={P(<Clearance />)} />
-      <Route path="/catalog" element={P(<Catalog />)} />
-      <Route path="/returns" element={P(<Returns />)} />
-      <Route path="/contact" element={P(<Contact />)} />
-      <Route path="/faq" element={P(<Faq />)} />
-      <Route path="/wishlist" element={P(<Wishlist />)} />
+      <Route path="/" element={Open(<Home />)} />
+      <Route path="/product/:id" element={Open(<ProductListing />)} />
+      <Route path="/search" element={Open(<SearchResults />)} />
+      <Route path="/shop" element={Open(<Shop />)} />
+      <Route path="/catalog" element={Open(<Catalog />)} />
+      <Route path="/returns" element={Open(<Returns />)} />
+      <Route path="/contact" element={Open(<Contact />)} />
+      <Route path="/faq" element={Open(<Faq />)} />
+      <Route path="/wishlist" element={Open(<Wishlist />)} />
       <Route path="/cart" element={P(<Cart />)} />
       <Route path="/login" element={<Login />} />
       <Route path="/admin" element={<Admin />} />

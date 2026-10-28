@@ -6,6 +6,9 @@ import {
   useProducts, updateProduct, addProduct, deleteProduct,
   discountPercent, priceFromDiscount,
 } from "../utils/productStore.js";
+import {
+  useSlides, addSlide, updateSlide, deleteSlide, moveSlide,
+} from "../utils/slideStore.js";
 import "./admin.css";
 import { BRAND } from "../config/brand.js";
 
@@ -13,15 +16,15 @@ const BUCKET = "product-images";
 const BLANK = { name: "", productCode: "", category: "Bracelets", mrp: "", price: "", discount: "", caption: "", clearance: false, inStock: true, images: [] };
 
 // photo lahan karun (max 1000px) Supabase Storage madhe upload karto, public link det
-async function uploadImage(file) {
+async function uploadImage(file, maxSize = 1000, folder = "") {
   const bitmap = await createImageBitmap(file);
-  const k = Math.min(1, 1000 / Math.max(bitmap.width, bitmap.height));
+  const k = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
   const c = document.createElement("canvas");
   c.width = Math.round(bitmap.width * k);
   c.height = Math.round(bitmap.height * k);
   c.getContext("2d").drawImage(bitmap, 0, 0, c.width, c.height);
   const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const path = `${folder}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: "image/jpeg" });
   if (error) throw new Error(error.message);
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
@@ -120,9 +123,121 @@ function Editor({ initial, onSave, onCancel }) {
   );
 }
 
+// ---------------- Home page slider ----------------
+function SlideEditor({ initial, onSave, onCancel }) {
+  const [f, setF] = useState(() => ({ image: "", title: "", subtitle: "", ...initial }));
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
+
+  async function pickFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    setErr("");
+    try {
+      set("image", await uploadImage(file, 1800, "slides/"));
+    } catch (x) {
+      setErr("Photo upload fail: " + x.message);
+    }
+    setBusy(false);
+  }
+
+  async function save(e) {
+    e.preventDefault();
+    if (!f.image) return setErr("Aadhi slider chi photo upload kara.");
+    setErr("");
+    setBusy(true);
+    try {
+      await onSave({ image: f.image, title: f.title.trim(), subtitle: f.subtitle.trim() });
+    } catch (x) {
+      setErr("Save fail: " + x.message);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="adm__form" onSubmit={save} noValidate>
+      <h2>{initial ? "Edit slide" : "Add new slide"}</h2>
+      <div>
+        <p className="adm__label">Slider photo {busy && "(uploading…)"}</p>
+        {f.image && <img src={f.image} alt="" className="adm__slidepreview" />}
+        <input type="file" accept="image/*" onChange={pickFile} />
+        <p className="adm__hint">Wide (landscape) photo vapara, sarvat chhan 1600×800 px. Photo aapoaap lahan hote.</p>
+      </div>
+      <label>Title (optional)<input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Festive Collection" /></label>
+      <label>Subtitle (optional)<input value={f.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="Timeless jewellery for every celebration" /></label>
+      {err && <p className="login__error" role="alert">{err}</p>}
+      <div className="adm__actions">
+        <button type="submit" className="btn btn--solid" disabled={busy}>{busy ? "Please wait…" : "Save"}</button>
+        <button type="button" className="btn btn--outline" onClick={onCancel} disabled={busy}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+
+function SliderPanel() {
+  const slides = useSlides();
+  const [editing, setEditing] = useState(null); // slide | "new" | null
+
+  const run = async (fn) => {
+    try { await fn(); } catch (e) { alert(e.message); }
+  };
+
+  if (editing) {
+    return (
+      <SlideEditor
+        initial={editing === "new" ? null : editing}
+        onCancel={() => setEditing(null)}
+        onSave={async (data) => {
+          if (editing === "new") await addSlide(data);
+          else await updateSlide(editing.id, data);
+          setEditing(null);
+        }}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="adm__bar">
+        <button type="button" className="btn btn--solid" onClick={() => setEditing("new")}>+ Add slide</button>
+        <span className="adm__note" style={{ margin: 0 }}>{slides.length} slides</span>
+      </div>
+      {slides.length === 0 && (
+        <p className="adm__note" style={{ display: "block", lineHeight: 1.6 }}>
+          Ajun ek pan slide nahi, mhanun website var default slides dakhavat aahet. Pahili slide add kelyavar fakt tumchya slides dakhtil.
+        </p>
+      )}
+      <ul className="adm__list">
+        {slides.map((s, i) => (
+          <li key={s.id} className="adm__item">
+            <img src={s.image} alt="" className="adm__thumb adm__thumb--wide" />
+            <div className="adm__info">
+              <b>{s.title || "(no title)"}</b>
+              <span>{s.subtitle || "(no subtitle)"}</span>
+              <span>Slide {i + 1} of {slides.length}</span>
+            </div>
+            <div className="adm__btns">
+              <div className="adm__move">
+                <button type="button" className="adm__link" disabled={i === 0} onClick={() => run(() => moveSlide(s.id, -1))} aria-label="Move up">↑</button>
+                <button type="button" className="adm__link" disabled={i === slides.length - 1} onClick={() => run(() => moveSlide(s.id, 1))} aria-label="Move down">↓</button>
+              </div>
+              <button type="button" className="btn btn--outline" onClick={() => setEditing(s)}>Edit</button>
+              <button type="button" className="adm__del" onClick={() => confirm("Ha slide delete karaycha?") && run(() => deleteSlide(s.id))}>Delete</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
 function Panel({ email }) {
   const products = useProducts();
   const [editing, setEditing] = useState(null); // product | "new" | null
+  const [tab, setTab] = useState("products"); // products | slider
 
   const run = async (fn) => {
     try { await fn(); } catch (e) { alert(e.message); }
@@ -139,7 +254,14 @@ function Panel({ email }) {
         </div>
       </div>
 
-      {editing ? (
+      <div className="adm__tabs">
+        <button type="button" className={tab === "products" ? "is-on" : ""} onClick={() => setTab("products")}>Products</button>
+        <button type="button" className={tab === "slider" ? "is-on" : ""} onClick={() => setTab("slider")}>Home slider</button>
+      </div>
+
+      {tab === "slider" ? (
+        <SliderPanel />
+      ) : editing ? (
         <Editor
           initial={editing === "new" ? null : editing}
           onCancel={() => setEditing(null)}

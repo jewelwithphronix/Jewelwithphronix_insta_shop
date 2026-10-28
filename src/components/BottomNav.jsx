@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import AccountButton from "./AccountButton.jsx";
 import { useLikes } from "../utils/likes.js";
 import { useCart } from "../utils/cart.js";
 import { HomeIcon, HeartIcon, SearchIcon, BagIcon, UserIcon } from "./Icons.jsx";
@@ -19,18 +20,28 @@ function TabInner({ tab }) {
 export default function BottomNav() {
   const { total } = useLikes();
   const { count } = useCart();
+  const { pathname } = useLocation();
   const tabs = [
     { label: "Home", icon: <HomeIcon size={28} />, to: "/" },
     { label: "Wishlist", icon: <HeartIcon size={28} />, badge: total, to: "/wishlist" },
     { label: "Search", icon: <SearchIcon size={28} />, to: "/search" },
     { label: "Cart", icon: <BagIcon size={28} />, badge: count, to: "/cart" },
-    { label: "Account", icon: <UserIcon size={28} />, to: "/login" },
+    { label: "Account", icon: <UserIcon size={28} />, account: true },
   ];
 
   return (
     <nav className="bnav" aria-label="Quick links">
       {tabs.map((tab) =>
-        tab.to ? (
+        tab.account ? (
+          <AccountButton
+            key={tab.label}
+            wrapperClass="bnav__acct"
+            buttonClass={"bnav__tab" + (pathname === "/login" ? " bnav__tab--active" : "")}
+            placement="up"
+          >
+            <TabInner tab={tab} />
+          </AccountButton>
+        ) : tab.to ? (
           <NavLink
             key={tab.label}
             to={tab.to}
@@ -47,4 +58,4 @@ export default function BottomNav() {
       )}
     </nav>
   );
-}
+} 

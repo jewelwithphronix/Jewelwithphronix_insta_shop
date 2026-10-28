@@ -11,7 +11,6 @@ const FAQS = [
   { q: "How can I check my order status?", a: `Message us on WhatsApp (${BRAND.whatsapp}) and we'll update you.` },
   { q: "Can I return or exchange a product?", a: "Yes, within 14 days of delivery if unused. Fill the form on the Returns & Exchanges page." },
   { q: "What if my product arrives damaged?", a: "Share an unboxing video and photos within 48 hours. We will replace or refund it." },
-  { q: "What is the Stock Clearance Sale?", a: "Limited-quantity pieces at reduced prices. They sell out quickly." },
   { q: "How do I take care of my jewellery?", a: "Keep away from water and perfume. Store flat in the pouch provided." },
   { q: "Can I cancel or change my order?", a: "Yes, before it is dispatched. Message us on WhatsApp as soon as possible." },
 ];

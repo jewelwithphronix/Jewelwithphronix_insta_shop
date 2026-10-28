@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { rs } from "../utils/format.js";
 import { HeartIcon } from "./Icons.jsx";
 import { useLikes, toggleLike, likeProduct } from "../utils/likes.js";
+import { discountPercent } from "../utils/productStore.js";
 
 export default function ProductCard({ product, variant = "default" }) {
   const boxed = variant === "boxed";
@@ -12,6 +13,7 @@ export default function ProductCard({ product, variant = "default" }) {
   const [bigHeart, setBigHeart] = useState(0); // double-click heart (counter restarts the animation)
   const [hearts, setHearts] = useState([]); // floating hearts
   const cover = product.images?.[0];
+  const off = discountPercent(product);
 
   // Instagram-style: several hearts float up from the bottom-right of the photo
   function burstHearts(count = 6) {
@@ -55,6 +57,7 @@ export default function ProductCard({ product, variant = "default" }) {
         }
         onDoubleClick={handleDoubleClick}
       >
+        {off > 0 && <span className="discount-badge">{off}% OFF</span>}
         <button
           type="button"
           className={`card__wish ${liked ? 'card__wish--liked' : ''}`}

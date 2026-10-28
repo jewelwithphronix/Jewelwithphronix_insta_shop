@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { BRAND } from "../config/brand.js";
-import { LogoMark, InstagramIcon, YoutubeIcon, ArrowRight } from "./Icons.jsx";
+import { LogoMark, InstagramIcon, ArrowRight } from "./Icons.jsx";
 
 const help = [
   { label: "FAQs", to: "/faq" },
@@ -57,8 +57,7 @@ export default function Footer() {
             <p className="foot__name">{BRAND.name}</p>
             <p className="foot__tagline">{BRAND.tagline}</p>
             <div className="foot__social">
-              <a href="#" aria-label="Instagram" onClick={(e) => e.preventDefault()}><InstagramIcon size={24} /></a>
-              <a href="#" aria-label="YouTube" onClick={(e) => e.preventDefault()}><YoutubeIcon size={26} /></a>
+              <a href={BRAND.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><InstagramIcon size={24} /></a>
             </div>
           </div>
           <div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BRAND } from "../config/brand.js";
 import SearchBar from "./SearchBar.jsx";
+import AccountButton from "./AccountButton.jsx";
 import { useLikes } from "../utils/likes.js";
 import { useCart } from "../utils/cart.js";
 import {
@@ -11,7 +12,7 @@ import {
 const NAV = [
   { label: "Home", to: "/" },
   { label: "Shop All", to: "/shop" },
-  { label: "Stock clearance Sale", to: "/clearance" },
+  // { label: "Stock clearance Sale", to: "/clearance" },
   { label: "Catalog", to: "/catalog" },
   // { label: "Necklaces", chevron: true },
   // { label: "Types", chevron: true },
@@ -79,7 +80,7 @@ export default function Header({ showSearch = false }) {
 
           <div className="hdr__icons">
             <Link to="/search" className="hdr__icon hdr__icon--desk" aria-label="Search"><SearchIcon size={28} /></Link>
-            <Link to="/login" className="hdr__icon hdr__icon--desk" aria-label="Account"><UserIcon size={28} /></Link>
+            <AccountButton wrapperClass="hdr__icon hdr__icon--desk" placement="down"><UserIcon size={28} /></AccountButton>
             <Link to="/wishlist" className="hdr__icon hdr__icon--badge" aria-label="Wishlist">
               <HeartIcon size={28} />
               {total > 0 && <span className="hdr__badge">{total}</span>}
